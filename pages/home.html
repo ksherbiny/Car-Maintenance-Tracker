@@ -1,0 +1,60 @@
+<div class="page page--home" id="page-home">
+
+  <!-- Sync status -->
+  <div class="section-header mb-8">
+    <span class="sync-badge sync-badge--offline" id="sync-badge">⬤ غير متصل</span>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="stat-card stat-card--full card mb-12" id="stat-total">
+    <div class="stat-card__icon">💰</div>
+    <div class="stat-card__label">إجمالي الصرف (كل الوقت)</div>
+    <div class="stat-card__value" id="val-total">جاري التحميل…</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card__icon">📅</div>
+      <div class="stat-card__label">هذه السنة</div>
+      <div class="stat-card__value" id="val-year">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__icon">🗓</div>
+      <div class="stat-card__label">هذا الشهر</div>
+      <div class="stat-card__value" id="val-month">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__icon">🛢</div>
+      <div class="stat-card__label">آخر تغيير زيت</div>
+      <div class="stat-card__value" id="val-oil">—</div>
+      <div class="stat-card__sub" id="val-oil-km"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__icon">🚗</div>
+      <div class="stat-card__label">عداد الكيلومترات</div>
+      <div class="stat-card__value" id="val-km">—</div>
+    </div>
+  </div>
+
+  <!-- Mini yearly chart -->
+  <div class="chart-card">
+    <div class="chart-title">آخر 5 سنوات</div>
+    <div class="chart-wrap chart-wrap--short">
+      <canvas id="chart-home-yearly"></canvas>
+    </div>
+  </div>
+
+  <!-- Recent entries -->
+  <div class="card">
+    <div class="section-header">
+      <span class="section-title">آخر 5 سجلات</span>
+      <button class="section-link" data-nav="history">عرض الكل</button>
+    </div>
+    <div id="recent-list">
+      <div class="skeleton" style="height:40px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:40px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="height:40px;"></div>
+    </div>
+  </div>
+
+</div>

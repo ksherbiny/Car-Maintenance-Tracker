@@ -1,0 +1,77 @@
+<div class="page page--add" id="page-add">
+
+  <div class="card">
+    <form id="entry-form" novalidate>
+      <input type="hidden" id="edit-id" value="" />
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="field-date">التاريخ</label>
+          <input class="form-control" type="date" id="field-date" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="field-category">الفئة</label>
+          <select class="form-control" id="field-category" required>
+            <option value="">— اختر —</option>
+            <option>Oil Change</option>
+            <option>Tires</option>
+            <option>Engine</option>
+            <option>Suspension</option>
+            <option>AC</option>
+            <option>Electrical</option>
+            <option>Cooling</option>
+            <option>Body &amp; Glass</option>
+            <option>Brakes</option>
+            <option>Gearbox</option>
+            <option>General Service</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="field-item">البند / العنوان</label>
+        <input
+          class="form-control"
+          type="text"
+          id="field-item"
+          dir="auto"
+          placeholder="مثال: زيت + فلتر  أو  Oil change"
+          required
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="field-price">السعر (EGP)</label>
+          <input class="form-control" type="number" id="field-price" min="0" step="1" placeholder="0" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="field-km">العداد (بالألف)</label>
+          <input class="form-control" type="number" id="field-km" min="0" step="1" placeholder="مثال: 419" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="field-comment">ملاحظات (اختياري)</label>
+        <textarea class="form-control" id="field-comment" dir="auto" placeholder="أي تفاصيل إضافية…"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" id="btn-save">
+          💾 حفظ
+        </button>
+        <button type="button" class="btn btn--ghost" id="btn-cancel">
+          ✕ إلغاء
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Category auto-detect hint -->
+  <p class="text-muted mt-8" id="cat-hint" style="font-size:0.75rem;text-align:center;display:none;">
+    تم تحديد الفئة تلقائيًا بناءً على البند ✓
+  </p>
+
+</div>
