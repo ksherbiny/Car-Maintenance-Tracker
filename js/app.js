@@ -453,12 +453,16 @@ function fmtEGP(n) {
 
 function fmtDate(iso) {
   if (!iso) return '—';
-  const d = new Date(iso + 'T00:00:00');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const day   = String(d.getDate()).padStart(2, '0');
-  const month = months[d.getMonth()];
-  const year  = d.getFullYear();
-  return day + '-' + month + '-' + year;
+  let d;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(iso)) {
+    const p = iso.split('/');
+    d = new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+  } else {
+    d = new Date(iso + 'T00:00:00');
+  }
+  if (isNaN(d.getTime())) return iso;
+  return String(d.getDate()).padStart(2, '0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();
 }
 
 function todayISO() {

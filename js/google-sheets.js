@@ -13,12 +13,25 @@ export function isConnected() {
   return !!_scriptUrl;
 }
 
+// ── Date normalizer ───────────────────────────────────────────────────────────
+// Converts any date string to YYYY-MM-DD before storing locally
+function normalizeDate(val) {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str; // already correct
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {     // dd/mm/yyyy or d/m/yyyy
+    const p = str.split('/');
+    return p[2] + '-' + String(Number(p[1])).padStart(2, '0') + '-' + String(Number(p[0])).padStart(2, '0');
+  }
+  return str;
+}
+
 // ── Read ─────────────────────────────────────────────────────────────────────
 export async function readSheet() {
   const resp = await fetch(_scriptUrl, { redirect: 'follow' });
   const json = await resp.json();
   if (!json.ok) throw new Error(json.error || 'Read failed');
-  return json.data;
+  return json.data.map(e => ({ ...e, date: normalizeDate(e.date) }));
 }
 
 // ── Write (fire-and-forget, no-cors) ─────────────────────────────────────────
