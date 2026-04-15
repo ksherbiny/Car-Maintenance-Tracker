@@ -1,23 +1,23 @@
-const CACHE_NAME = 'car-tracker-v3';
+const CACHE_NAME = 'car-tracker-v4';
 const SYNC_QUEUE_KEY = 'sheets-sync-queue';
 
 // Will be fully populated in Step 6 — listed here as skeleton
 const STATIC_ASSETS = [
-  '/car-maintenance-tracker/',
-  '/car-maintenance-tracker/index.html',
-  '/car-maintenance-tracker/manifest.json',
-  '/car-maintenance-tracker/css/styles.css',
-  '/car-maintenance-tracker/js/app.js',
-  '/car-maintenance-tracker/js/data.js',
-  '/car-maintenance-tracker/js/charts.js',
-  '/car-maintenance-tracker/js/google-sheets.js',
-  '/car-maintenance-tracker/js/seed-data.js',
-  '/car-maintenance-tracker/pages/home.html',
-  '/car-maintenance-tracker/pages/add.html',
-  '/car-maintenance-tracker/pages/history.html',
-  '/car-maintenance-tracker/pages/analysis.html',
-  '/car-maintenance-tracker/icons/icon-192.png',
-  '/car-maintenance-tracker/icons/icon-512.png',
+  '/Car-Maintenance-Tracker/',
+  '/Car-Maintenance-Tracker/index.html',
+  '/Car-Maintenance-Tracker/manifest.json',
+  '/Car-Maintenance-Tracker/css/styles.css',
+  '/Car-Maintenance-Tracker/js/app.js',
+  '/Car-Maintenance-Tracker/js/data.js',
+  '/Car-Maintenance-Tracker/js/charts.js',
+  '/Car-Maintenance-Tracker/js/google-sheets.js',
+  '/Car-Maintenance-Tracker/js/seed-data.js',
+  '/Car-Maintenance-Tracker/pages/home.html',
+  '/Car-Maintenance-Tracker/pages/add.html',
+  '/Car-Maintenance-Tracker/pages/history.html',
+  '/Car-Maintenance-Tracker/pages/analysis.html',
+  '/Car-Maintenance-Tracker/icons/icon-192.png',
+  '/Car-Maintenance-Tracker/icons/icon-512.png',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'
@@ -53,7 +53,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Return offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
-          return caches.match('/car-maintenance-tracker/index.html');
+          return caches.match('/Car-Maintenance-Tracker/index.html');
         }
       });
     })

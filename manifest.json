@@ -2,10 +2,10 @@
   "name": "Car Maintenance Tracker",
   "short_name": "CarTracker",
   "description": "Track your car maintenance history and costs",
-  "start_url": "/car-maintenance-tracker/",
-  "scope": "/car-maintenance-tracker/",
+  "start_url": "/Car-Maintenance-Tracker/",
+  "scope": "/Car-Maintenance-Tracker/",
   "display": "standalone",
-  "background_color": "#f4f6f9",
+  "background_color": "#000000",
   "theme_color": "#0070C0",
   "orientation": "portrait",
   "icons": [

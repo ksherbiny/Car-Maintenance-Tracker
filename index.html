@@ -101,7 +101,7 @@
     // Register service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js', { scope: '/car-maintenance-tracker/' })
+        navigator.serviceWorker.register('service-worker.js', { scope: '/Car-Maintenance-Tracker/' })
           .catch(() => {/* SW not critical */});
       });
     }
