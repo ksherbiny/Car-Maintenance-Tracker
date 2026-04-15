@@ -96,7 +96,7 @@ async function checkMaintenanceAndNotify() {
       if (tireDays <= 14) {
         toNotify.push({
           tag:   'tire-reminder',
-          title: tireDays <= 0 ? '⚠️ Tire Change Overdue!' : '🔧 Tire Change Due Soon',
+          title: tireDays <= 0 ? '⚠️ Tire Change Overdue!' : '🛞 Tire Change Due Soon',
           body:  tireDays <= 0
             ? 'Overdue by ' + Math.abs(tireLeft).toLocaleString() + ' km — replacement needed'
             : 'Due in ~' + tireDays + ' days (' + tireLeft.toLocaleString() + ' km remaining)'
