@@ -11,14 +11,14 @@ function doGet() {
       var r = values[i];
       if (r[0]) {
         rows.push({
-          id: String(r[0]),
-          date: String(r[1]),
-          item: String(r[2]),
-          price: Number(r[3]),
-          km: Number(r[4]),
+          id:       String(r[0]),
+          date:     formatDate(r[1]),
+          item:     String(r[2]),
+          price:    Number(r[3]),
+          km:       Number(r[4]),
           category: String(r[5]),
-          comment: String(r[6] || ''),
-          source: String(r[7] || 'sheets')
+          comment:  String(r[6] || ''),
+          source:   String(r[7] || 'sheets')
         });
       }
     }
@@ -26,6 +26,19 @@ function doGet() {
   } catch(err) {
     return response({ ok: false, error: err.message });
   }
+}
+
+// Normalize any date value to YYYY-MM-DD string
+// Handles both JS Date objects (from Google Sheets) and plain strings
+function formatDate(val) {
+  if (!val) return '';
+  if (val instanceof Date) {
+    var y = val.getFullYear();
+    var m = String(val.getMonth() + 1).padStart(2, '0');
+    var d = String(val.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+  }
+  return String(val);
 }
 
 function doPost(e) {
