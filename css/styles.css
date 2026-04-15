@@ -113,13 +113,13 @@ a { color: inherit; text-decoration: none; }
 /* ── Hero total card ─────────────────────────────────────── */
 .stat-card--hero {
   text-align: center;
-  background: linear-gradient(135deg, #0070C0 0%, #005a9e 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #0070C0 0%, #005a9e 100%) !important;
+  color: #fff !important;
   padding: 18px 16px;
 }
 .stat-card--hero .stat-card__icon { font-size: 1.6rem; margin-bottom: 4px; }
 .stat-card--hero .stat-card__label {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255,255,255,0.85) !important;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -127,7 +127,7 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 4px;
 }
 .stat-card--hero .stat-card__value {
-  color: #fff;
+  color: #fff !important;
   font-size: 1.7rem;
   font-weight: 700;
 }
@@ -222,15 +222,21 @@ a { color: inherit; text-decoration: none; }
 .nav-icon--add {
   display: flex; align-items: center; justify-content: center;
   width: 36px; height: 36px;
-  background: var(--primary);
-  color: #fff;
+  background: transparent;
+  border: 2px solid var(--nav-inactive);
+  color: var(--nav-inactive);
   font-size: 1.4rem;
   border-radius: 50%;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.nav-item.active .nav-icon--add {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
   box-shadow: 0 3px 10px rgba(0,112,192,0.35);
 }
-.nav-item.active .nav-icon--add { background: var(--primary-dark); }
 .nav-label { font-size: 0.68rem; font-weight: 600; }
 
 /* ── Cards ───────────────────────────────────────────────── */
