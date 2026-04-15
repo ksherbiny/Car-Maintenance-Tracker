@@ -29,16 +29,25 @@ function doGet() {
 }
 
 // Normalize any date value to YYYY-MM-DD string
-// Handles both JS Date objects (from Google Sheets) and plain strings
+// Handles: JS Date objects, YYYY-MM-DD, dd/mm/yyyy, d/m/yyyy
 function formatDate(val) {
   if (!val) return '';
+  // Google Sheets Date object
   if (val instanceof Date) {
     var y = val.getFullYear();
     var m = String(val.getMonth() + 1).padStart(2, '0');
     var d = String(val.getDate()).padStart(2, '0');
     return y + '-' + m + '-' + d;
   }
-  return String(val);
+  var str = String(val).trim();
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // dd/mm/yyyy or d/m/yyyy
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {
+    var parts = str.split('/');
+    return parts[2] + '-' + String(Number(parts[1])).padStart(2, '0') + '-' + String(Number(parts[0])).padStart(2, '0');
+  }
+  return str;
 }
 
 function doPost(e) {
