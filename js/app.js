@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('settings-close').addEventListener('click', closeSettings);
   document.getElementById('settings-backdrop').addEventListener('click', closeSettings);
   document.getElementById('btn-connect-sheets').addEventListener('click', connectSheets);
+  document.getElementById('btn-save-reminders').addEventListener('click', saveReminders);
   document.getElementById('btn-reset-data').addEventListener('click', resetData);
 
   // Navigate to home
@@ -117,6 +118,7 @@ async function initHome() {
   }
 
   renderHomeChart('chart-home-yearly', yearly);
+  await renderReminders(stats);
 
   // Recent 5
   const recent = _allEntries.slice(0, 5);
@@ -383,10 +385,13 @@ async function initAnalysis() {
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────────
-function openSettings() {
+async function openSettings() {
   const modal = document.getElementById('settings-modal');
   modal.removeAttribute('hidden');
-  document.getElementById('input-script-url').value = _scriptUrl;
+  document.getElementById('input-script-url').value   = _scriptUrl;
+  document.getElementById('input-oil-interval').value  = (await getSetting('oilInterval'))  || '';
+  document.getElementById('input-tire-interval').value = (await getSetting('tireInterval')) || '';
+  document.getElementById('input-daily-km').value      = (await getSetting('dailyKm'))      || '';
 }
 
 function closeSettings() {
@@ -405,6 +410,80 @@ async function connectSheets() {
   showToast('✅ Connected — syncing…');
   closeSettings();
   syncInBackground(true);
+}
+
+async function saveReminders() {
+  const oil   = parseInt(document.getElementById('input-oil-interval').value)  || 0;
+  const tire  = parseInt(document.getElementById('input-tire-interval').value) || 0;
+  const daily = parseInt(document.getElementById('input-daily-km').value)      || 0;
+  await setSetting('oilInterval',  oil);
+  await setSetting('tireInterval', tire);
+  await setSetting('dailyKm',      daily);
+  showToast('✅ Reminders saved');
+  closeSettings();
+  if (_currentPage === 'home') initHome();
+}
+
+async function renderReminders(stats) {
+  const container = document.getElementById('reminder-alerts');
+  if (!container) return;
+
+  const oilInterval  = (await getSetting('oilInterval'))  || 0;
+  const tireInterval = (await getSetting('tireInterval')) || 0;
+  const dailyKm      = (await getSetting('dailyKm'))      || 0;
+
+  if (!oilInterval && !tireInterval || !dailyKm) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const currentKm = stats.currentKm * 1000;
+  const alerts = [];
+
+  // Oil change reminder
+  if (oilInterval && stats.lastOil) {
+    const lastKm   = stats.lastOil.km * 1000;
+    const nextKm   = lastKm + oilInterval;
+    const kmLeft   = nextKm - currentKm;
+    const daysLeft = Math.round(kmLeft / dailyKm);
+    alerts.push({ icon: '🛢', label: 'Oil Change', kmLeft, daysLeft });
+  }
+
+  // Tire change reminder
+  if (tireInterval) {
+    const lastTire = _allEntries
+      .filter(e => e.category === 'Tires' && e.km)
+      .sort((a, b) => b.km - a.km)[0];
+    if (lastTire) {
+      const lastKm   = lastTire.km * 1000;
+      const nextKm   = lastKm + tireInterval;
+      const kmLeft   = nextKm - currentKm;
+      const daysLeft = Math.round(kmLeft / dailyKm);
+      alerts.push({ icon: '🛞', label: 'Tire Change', kmLeft, daysLeft });
+    }
+  }
+
+  if (!alerts.length) { container.innerHTML = ''; return; }
+
+  container.innerHTML = alerts.map(a => {
+    const status  = a.daysLeft <= 0 ? 'danger' : a.daysLeft <= 30 ? 'warning' : 'ok';
+    const kmText  = a.kmLeft <= 0
+      ? `Overdue by ${Math.abs(a.kmLeft).toLocaleString('en-US')} km`
+      : `${a.kmLeft.toLocaleString('en-US')} km remaining`;
+    const dayText = a.daysLeft <= 0
+      ? `${Math.abs(a.daysLeft)} days overdue`
+      : `~${a.daysLeft} days left`;
+    const badge   = status === 'danger' ? '⚠️ Overdue' : status === 'warning' ? '⏰ Soon' : '✅ OK';
+    return `
+      <div class="reminder-card reminder-card--${status}">
+        <span class="reminder-card__icon">${a.icon}</span>
+        <div class="reminder-card__info">
+          <div class="reminder-card__label">${a.label}</div>
+          <div class="reminder-card__detail">${kmText} · ${dayText}</div>
+        </div>
+        <span class="reminder-card__badge reminder-card__badge--${status}">${badge}</span>
+      </div>`;
+  }).join('');
 }
 
 async function resetData() {

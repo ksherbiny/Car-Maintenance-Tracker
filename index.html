@@ -87,6 +87,16 @@
           See GOOGLE_SHEETS_SETUP.md for the 5-step setup guide.
         </p>
         <hr class="settings-divider" />
+        <p class="settings-section-title">Maintenance Reminders</p>
+        <label class="settings-label" for="input-oil-interval">Oil Change Every (km)</label>
+        <input class="settings-input" type="number" id="input-oil-interval" placeholder="e.g. 5000" min="0" />
+        <label class="settings-label" for="input-tire-interval">Tire Change Every (km)</label>
+        <input class="settings-input" type="number" id="input-tire-interval" placeholder="e.g. 40000" min="0" />
+        <label class="settings-label" for="input-daily-km">Daily Driving (km/day)</label>
+        <input class="settings-input" type="number" id="input-daily-km" placeholder="e.g. 50" min="0" />
+        <button class="btn btn--primary btn--full" id="btn-save-reminders">💾 Save Reminders</button>
+
+        <hr class="settings-divider" />
         <button class="btn btn--danger btn--full" id="btn-reset-data">🗑 Reset All Data</button>
       </div>
     </div>

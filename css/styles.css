@@ -110,6 +110,52 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.68rem;
 }
 
+/* ── Reminder alert cards ────────────────────────────────── */
+.reminder-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+  border-left: 4px solid var(--border);
+}
+.reminder-card--ok      { border-left-color: var(--success); }
+.reminder-card--warning { border-left-color: var(--accent); }
+.reminder-card--danger  { border-left-color: var(--danger); }
+.reminder-card__icon {
+  font-size: 1.6rem;
+  width: 42px; height: 42px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: var(--primary-light);
+}
+.reminder-card__info { flex: 1; min-width: 0; }
+.reminder-card__label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.reminder-card__detail {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+.reminder-card__badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.reminder-card__badge--ok      { background: #d4edda; color: #1a7a3a; }
+.reminder-card__badge--warning { background: #fff3cd; color: #856404; }
+.reminder-card__badge--danger  { background: #f8d7da; color: #842029; }
+
 /* ── Hero total card ─────────────────────────────────────── */
 .stat-card--hero {
   text-align: center;
