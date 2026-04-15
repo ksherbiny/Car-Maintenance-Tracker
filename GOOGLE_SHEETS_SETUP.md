@@ -62,6 +62,16 @@ function doPost(e) {
     if (body.action === 'append') {
       sheet.appendRow(toRow(body.entry));
 
+    } else if (body.action === 'batchAppend') {
+      var entries = body.entries;
+      var rows = [];
+      for (var j = 0; j < entries.length; j++) {
+        rows.push(toRow(entries[j]));
+      }
+      if (rows.length > 0) {
+        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 8).setValues(rows);
+      }
+
     } else if (body.action === 'update') {
       var data = sheet.getDataRange().getValues();
       var found = false;
@@ -185,7 +195,7 @@ create a new version of the same deployment.
 |---------|-----|
 | SyntaxError on line 1 | You accidentally copied the ` ``` ` fence from the markdown — delete everything in the editor and paste only the code between the fences |
 | Badge stays Offline | Check internet connection |
-| Badge shows Synced but sheet is empty | Wait 10 seconds and pull-to-refresh; first sync uploads all 123 records which takes a moment |
+| Sheet only shows a few records after first sync | You have an old version of the script — replace it with the latest script above and create a new deployment, then re-connect in Settings |
 | "Apps Script URL" validation error | Make sure the URL starts with `https://script.google.com/macros/s/` |
 | Authorization error during deploy | Make sure you chose **Anyone** (not "Anyone with Google account") in Step 3 |
 | Duplicate rows in sheet | Delete duplicates manually; the app de-duplicates by `id` on next sync |

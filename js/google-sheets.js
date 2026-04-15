@@ -47,25 +47,26 @@ export function deleteRow(id) {
 
 // ── Sync ─────────────────────────────────────────────────────────────────────
 // 1. Pull sheet data via GET
-// 2. Push local-only entries via POST (fire-and-forget)
-// 3. Return merged list (local wins on conflict)
+// 2. Compute which local entries are missing from the sheet
+// 3. Send ALL missing entries in ONE batch POST (avoids rate-limiting)
+// 4. Return merged list (local wins on conflict)
 export async function syncAll(localData) {
   const sheetData = await readSheet();
 
   const sheetById = Object.fromEntries(sheetData.map(e => [e.id, e]));
   const localById = Object.fromEntries(localData.map(e => [e.id, e]));
 
-  // Upload entries that exist locally but not in the sheet
-  for (const e of localData) {
-    if (!sheetById[e.id]) {
-      scriptPost({ action: 'append', entry: e });
-    }
+  const toAppend = localData.filter(e => !sheetById[e.id]);
+
+  // Send all missing entries in a single batch request
+  if (toAppend.length > 0) {
+    scriptPost({ action: 'batchAppend', entries: toAppend });
   }
 
   // Merge: local wins on conflicts; sheet-only entries are pulled in
   const merged = [
     ...sheetData.map(s => localById[s.id] || s),
-    ...localData.filter(e => !sheetById[e.id])
+    ...toAppend
   ];
 
   return merged.sort((a, b) => b.date.localeCompare(a.date));
