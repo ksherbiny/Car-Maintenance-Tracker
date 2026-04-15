@@ -1,7 +1,7 @@
 # Google Sheets Sync — Setup Guide (Apps Script)
 
 No Google Cloud project, no OAuth, no Client IDs.  
-Just a Google Sheet + a 20-line script + one URL pasted in Settings.
+Just a Google Sheet + a script + one URL pasted in Settings.
 
 ---
 
@@ -20,108 +20,18 @@ Inside your new sheet:
 1. Click the menu **Extensions → Apps Script**
 2. A new tab opens with a code editor showing an empty `function myFunction() {}`
 3. **Select all** (Ctrl+A) and **delete** it
-4. Paste the entire script below:
+4. Open the raw script file at this URL — it contains nothing but the code:
 
-```
-var SHEET_NAME = 'Sheet1';
-var HEADERS = ['id','date','item','price','km','category','comment','source'];
+   **[👉 Click here to open the raw script](https://raw.githubusercontent.com/ksherbiny/Car-Maintenance-Tracker/main/apps-script.gs)**
 
-function doGet() {
-  try {
-    var sheet = getSheet();
-    ensureHeader(sheet);
-    var values = sheet.getDataRange().getValues();
-    var rows = [];
-    for (var i = 1; i < values.length; i++) {
-      var r = values[i];
-      if (r[0]) {
-        rows.push({
-          id: String(r[0]),
-          date: String(r[1]),
-          item: String(r[2]),
-          price: Number(r[3]),
-          km: Number(r[4]),
-          category: String(r[5]),
-          comment: String(r[6] || ''),
-          source: String(r[7] || 'sheets')
-        });
-      }
-    }
-    return response({ ok: true, data: rows });
-  } catch(err) {
-    return response({ ok: false, error: err.message });
-  }
-}
+5. **Ctrl+A** to select all → **Ctrl+C** to copy
+6. Go back to the Apps Script tab → **Ctrl+V** to paste
+7. Click the 💾 **Save** icon (or Ctrl+S) → name the project `Car Maintenance Tracker`
 
-function doPost(e) {
-  try {
-    var body = JSON.parse(e.postData.contents);
-    var sheet = getSheet();
-    ensureHeader(sheet);
-
-    if (body.action === 'append') {
-      sheet.appendRow(toRow(body.entry));
-
-    } else if (body.action === 'batchAppend') {
-      var entries = body.entries;
-      var rows = [];
-      for (var j = 0; j < entries.length; j++) {
-        rows.push(toRow(entries[j]));
-      }
-      if (rows.length > 0) {
-        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, 8).setValues(rows);
-      }
-
-    } else if (body.action === 'update') {
-      var data = sheet.getDataRange().getValues();
-      var found = false;
-      for (var i = 1; i < data.length; i++) {
-        if (String(data[i][0]) === String(body.entry.id)) {
-          sheet.getRange(i+1, 1, 1, 8).setValues([toRow(body.entry)]);
-          found = true;
-          break;
-        }
-      }
-      if (!found) sheet.appendRow(toRow(body.entry));
-
-    } else if (body.action === 'delete') {
-      var data = sheet.getDataRange().getValues();
-      for (var i = 1; i < data.length; i++) {
-        if (String(data[i][0]) === String(body.id)) {
-          sheet.deleteRow(i + 1);
-          break;
-        }
-      }
-    }
-
-    return response({ ok: true });
-  } catch(err) {
-    return response({ ok: false, error: err.message });
-  }
-}
-
-function getSheet() {
-  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME)
-      || SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-}
-
-function ensureHeader(sheet) {
-  var first = sheet.getRange(1, 1, 1, 8).getValues()[0];
-  if (first[0] !== 'id') {
-    sheet.getRange(1, 1, 1, 8).setValues([HEADERS]);
-  }
-}
-
-function toRow(e) {
-  return [e.id, e.date, e.item, e.price || 0, e.km || 0, e.category, e.comment || '', e.source || 'manual'];
-}
-
-function response(data) {
-  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-}
-```
-
-5. Click the 💾 **Save** icon (or Ctrl+S) — name the project `Car Maintenance Tracker`
+> **Why use the raw file?**  
+> Copying from a markdown page can accidentally include formatting characters
+> that cause a SyntaxError on line 1. The raw file is plain text with nothing
+> extra around it.
 
 ---
 
@@ -130,7 +40,6 @@ function response(data) {
 1. Click the blue **Deploy** button (top right) → **New deployment**
 2. Click the ⚙️ gear icon next to "Select type" → choose **Web app**
 3. Fill in:
-   - **Description:** `v1`
    - **Execute as:** `Me`
    - **Who has access:** `Anyone`
 4. Click **Deploy**
@@ -152,7 +61,20 @@ function response(data) {
 3. Tap **Connect Google Sheets**
 4. The badge changes to **⬤ Synced**
 
-That's it — all 123 records are pushed to your sheet automatically on first sync.
+All records are pushed to your sheet automatically on first sync.
+
+---
+
+## Updating the script later
+
+If the script ever changes and you need to update it:
+
+1. Go to Apps Script → open the project
+2. Open the raw file link above → Ctrl+A → Ctrl+C
+3. In Apps Script → Ctrl+A → Delete → Ctrl+V → Save
+4. Click **Deploy → Manage deployments**
+5. Click the ✏️ **pencil** icon → set Version to **New version** → **Deploy**
+6. Same URL — no need to update Settings in the app
 
 ---
 
@@ -181,21 +103,13 @@ Row 1 is the header, data starts at row 2:
 
 ---
 
-## Re-deploying after script changes
-
-If you ever edit the script, you must create a **new deployment** (not update
-the existing one) to get an updated URL — or use **Manage deployments** to
-create a new version of the same deployment.
-
----
-
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| SyntaxError on line 1 | You accidentally copied the ` ``` ` fence from the markdown — delete everything in the editor and paste only the code between the fences |
+| SyntaxError on line 1 | You copied from the markdown file — use the raw file link in Step 2 instead |
 | Badge stays Offline | Check internet connection |
-| Sheet only shows a few records after first sync | You have an old version of the script — replace it with the latest script above and create a new deployment, then re-connect in Settings |
+| Sheet only shows a few records | Old script version — redo Steps 2–3 using the raw file link, then re-connect in Settings |
 | "Apps Script URL" validation error | Make sure the URL starts with `https://script.google.com/macros/s/` |
 | Authorization error during deploy | Make sure you chose **Anyone** (not "Anyone with Google account") in Step 3 |
-| Duplicate rows in sheet | Delete duplicates manually; the app de-duplicates by `id` on next sync |
+| Duplicate rows in sheet | Delete duplicates manually in the sheet; the app de-duplicates by `id` on next sync |
