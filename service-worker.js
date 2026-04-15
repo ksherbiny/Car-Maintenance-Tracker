@@ -1,4 +1,4 @@
-const CACHE_NAME = 'car-tracker-v4';
+const CACHE_NAME = 'car-tracker-v5';
 const SYNC_QUEUE_KEY = 'sheets-sync-queue';
 
 // Will be fully populated in Step 6 — listed here as skeleton
@@ -59,6 +59,82 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+// ── Periodic Background Sync — maintenance reminders ─────────────────────────
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'maintenance-reminder') {
+    event.waitUntil(checkMaintenanceAndNotify());
+  }
+});
+
+async function checkMaintenanceAndNotify() {
+  try {
+    var meta = await readIDB('CarTracker', 'entries', 'car_meta');
+    if (!meta || !meta.reminderState) return;
+    var rs = meta.reminderState;
+    if (!rs.dailyKm) return;
+
+    var toNotify = [];
+
+    if (rs.oilInterval && rs.lastOilKm) {
+      var oilLeft = (rs.lastOilKm + rs.oilInterval) - rs.currentKm;
+      var oilDays = Math.round(oilLeft / rs.dailyKm);
+      if (oilDays <= 14) {
+        toNotify.push({
+          tag:   'oil-reminder',
+          title: oilDays <= 0 ? '⚠️ Oil Change Overdue!' : '🛢 Oil Change Due Soon',
+          body:  oilDays <= 0
+            ? 'Overdue by ' + Math.abs(oilLeft).toLocaleString() + ' km — service needed'
+            : 'Due in ~' + oilDays + ' days (' + oilLeft.toLocaleString() + ' km remaining)'
+        });
+      }
+    }
+
+    if (rs.tireInterval && rs.lastTireKm) {
+      var tireLeft = (rs.lastTireKm + rs.tireInterval) - rs.currentKm;
+      var tireDays = Math.round(tireLeft / rs.dailyKm);
+      if (tireDays <= 14) {
+        toNotify.push({
+          tag:   'tire-reminder',
+          title: tireDays <= 0 ? '⚠️ Tire Change Overdue!' : '🔧 Tire Change Due Soon',
+          body:  tireDays <= 0
+            ? 'Overdue by ' + Math.abs(tireLeft).toLocaleString() + ' km — replacement needed'
+            : 'Due in ~' + tireDays + ' days (' + tireLeft.toLocaleString() + ' km remaining)'
+        });
+      }
+    }
+
+    for (var i = 0; i < toNotify.length; i++) {
+      await self.registration.showNotification(toNotify[i].title, {
+        body:             toNotify[i].body,
+        tag:              toNotify[i].tag,
+        icon:             '/Car-Maintenance-Tracker/icons/icon-192.png',
+        badge:            '/Car-Maintenance-Tracker/icons/icon-192.png',
+        requireInteraction: true
+      });
+    }
+  } catch (e) {}
+}
+
+// Read a single key from localForage's IndexedDB store
+function readIDB(dbName, storeName, key) {
+  return new Promise(function(resolve) {
+    try {
+      var req = indexedDB.open(dbName);
+      req.onsuccess = function(e) {
+        try {
+          var db = e.target.result;
+          var tx = db.transaction(storeName, 'readonly');
+          var store = tx.objectStore(storeName);
+          var get = store.get(key);
+          get.onsuccess = function() { resolve(get.result || null); };
+          get.onerror   = function() { resolve(null); };
+        } catch(_) { resolve(null); }
+      };
+      req.onerror = function() { resolve(null); };
+    } catch(_) { resolve(null); }
+  });
+}
 
 // Background sync: retry queued Sheets API calls when back online
 self.addEventListener('sync', event => {

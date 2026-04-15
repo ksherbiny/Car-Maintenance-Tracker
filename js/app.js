@@ -119,6 +119,7 @@ async function initHome() {
 
   renderHomeChart('chart-home-yearly', yearly);
   await renderReminders(stats);
+  await updateReminderState();
 
   // Recent 5
   const recent = _allEntries.slice(0, 5);
@@ -419,9 +420,46 @@ async function saveReminders() {
   await setSetting('oilInterval',  oil);
   await setSetting('tireInterval', tire);
   await setSetting('dailyKm',      daily);
+
+  // Persist state snapshot so the service worker can check without loading the full app
+  await updateReminderState();
+
+  // Request notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+
+  // Register periodic background sync (Android Chrome installed PWA)
+  if ('serviceWorker' in navigator) {
+    try {
+      const sw = await navigator.serviceWorker.ready;
+      if ('periodicSync' in sw) {
+        await sw.periodicSync.register('maintenance-reminder', {
+          minInterval: 12 * 60 * 60 * 1000   // check every 12 hours
+        });
+      }
+    } catch (_) {}
+  }
+
   showToast('✅ Reminders saved');
   closeSettings();
   if (_currentPage === 'home') initHome();
+}
+
+// Keep a lightweight state snapshot in settings so the SW can read it from IDB
+async function updateReminderState() {
+  const oilInterval  = (await getSetting('oilInterval'))  || 0;
+  const tireInterval = (await getSetting('tireInterval')) || 0;
+  const dailyKm      = (await getSetting('dailyKm'))      || 0;
+  if (!oilInterval && !tireInterval) return;
+  const stats    = await getStats();
+  const lastTire = _allEntries.filter(e => e.category === 'Tires' && e.km).sort((a,b) => b.km - a.km)[0];
+  await setSetting('reminderState', {
+    oilInterval, tireInterval, dailyKm,
+    currentKm:  stats.currentKm * 1000,
+    lastOilKm:  stats.lastOil  ? stats.lastOil.km  * 1000 : 0,
+    lastTireKm: lastTire       ? lastTire.km        * 1000 : 0
+  });
 }
 
 async function renderReminders(stats) {
@@ -446,7 +484,7 @@ async function renderReminders(stats) {
     const nextKm   = lastKm + oilInterval;
     const kmLeft   = nextKm - currentKm;
     const daysLeft = Math.round(kmLeft / dailyKm);
-    alerts.push({ icon: '🛢', label: 'Oil Change', kmLeft, daysLeft });
+    alerts.push({ icon: '🛢', type: 'oil', label: 'Oil Change', kmLeft, daysLeft });
   }
 
   // Tire change reminder
@@ -459,7 +497,7 @@ async function renderReminders(stats) {
       const nextKm   = lastKm + tireInterval;
       const kmLeft   = nextKm - currentKm;
       const daysLeft = Math.round(kmLeft / dailyKm);
-      alerts.push({ icon: '🛞', label: 'Tire Change', kmLeft, daysLeft });
+      alerts.push({ icon: '🔧', type: 'tire', label: 'Tire Change', kmLeft, daysLeft });
     }
   }
 
@@ -476,7 +514,7 @@ async function renderReminders(stats) {
     const badge   = status === 'danger' ? '⚠️ Overdue' : status === 'warning' ? '⏰ Soon' : '✅ OK';
     return `
       <div class="reminder-card reminder-card--${status}">
-        <span class="reminder-card__icon">${a.icon}</span>
+        <span class="reminder-card__icon reminder-card__icon--${a.type}">${a.icon}</span>
         <div class="reminder-card__info">
           <div class="reminder-card__label">${a.label}</div>
           <div class="reminder-card__detail">${kmText} · ${dayText}</div>

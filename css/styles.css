@@ -133,6 +133,8 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0;
   background: var(--primary-light);
 }
+.reminder-card__icon--oil  { background: #fff3cd; }
+.reminder-card__icon--tire { background: #d4edda; }
 .reminder-card__info { flex: 1; min-width: 0; }
 .reminder-card__label {
   font-size: 0.88rem;
