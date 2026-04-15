@@ -455,11 +455,13 @@ function fmtDate(iso) {
   if (!iso) return '—';
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   let d;
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(iso)) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    d = new Date(iso + 'T00:00:00');          // YYYY-MM-DD
+  } else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(iso)) {
     const p = iso.split('/');
-    d = new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+    d = new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));  // dd/mm/yyyy
   } else {
-    d = new Date(iso + 'T00:00:00');
+    d = new Date(iso);                         // any other format JS can parse
   }
   if (isNaN(d.getTime())) return iso;
   return String(d.getDate()).padStart(2, '0') + '-' + months[d.getMonth()] + '-' + d.getFullYear();

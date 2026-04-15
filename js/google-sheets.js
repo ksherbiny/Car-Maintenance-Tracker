@@ -14,14 +14,21 @@ export function isConnected() {
 }
 
 // ── Date normalizer ───────────────────────────────────────────────────────────
-// Converts any date string to YYYY-MM-DD before storing locally
+// Converts any date format to YYYY-MM-DD before storing locally
 function normalizeDate(val) {
   if (!val) return '';
   const str = String(val).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str; // already correct
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {     // dd/mm/yyyy or d/m/yyyy
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str; // already YYYY-MM-DD
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)) {     // dd/mm/yyyy
     const p = str.split('/');
     return p[2] + '-' + String(Number(p[1])).padStart(2, '0') + '-' + String(Number(p[0])).padStart(2, '0');
+  }
+  // Fallback: parse anything JS can understand (e.g. "Sat Mar 07 2026 00:00:00 GMT+0200")
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
   }
   return str;
 }
