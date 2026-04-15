@@ -712,6 +712,15 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   padding: 1px 4px;
   font-size: 0.75rem;
 }
+.sheets-guide__link { color: var(--primary); font-weight: 600; }
+
+/* ── Backup row ──────────────────────────────────────────── */
+.backup-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.backup-row .btn { flex: 1; }
 
 /* ── Toast ───────────────────────────────────────────────── */
 .toast {

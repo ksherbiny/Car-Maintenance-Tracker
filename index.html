@@ -87,7 +87,7 @@
           <ol class="sheets-guide__steps">
             <li>Go to <strong>sheets.google.com</strong> → create a new blank sheet, name it <em>Car Maintenance Data</em></li>
             <li>Inside the sheet: <strong>Extensions → Apps Script</strong> → delete the default code</li>
-            <li>Copy the script from <code>apps-script.gs</code> in the project → paste it → Save</li>
+            <li>Open <a class="sheets-guide__link" href="https://raw.githubusercontent.com/ksherbiny/Car-Maintenance-Tracker/main/apps-script.gs" target="_blank">this link</a> → Select All → Copy → paste into Apps Script → Save</li>
             <li>Click <strong>Deploy → New deployment</strong> → type: <em>Web app</em> → Execute as: <em>Me</em> → Access: <em>Anyone</em> → Deploy</li>
             <li>Authorize access when prompted → copy the <strong>Web App URL</strong></li>
             <li>Paste that URL in the field above → tap <strong>Connect Google Sheets</strong></li>
@@ -105,8 +105,10 @@
 
         <hr class="settings-divider" />
         <p class="settings-section-title">Data Backup</p>
-        <button class="btn btn--secondary btn--full" id="btn-export-data">📤 Export Backup (JSON)</button>
-        <button class="btn btn--secondary btn--full" id="btn-import-data">📥 Restore from Backup</button>
+        <div class="backup-row">
+          <button class="btn btn--secondary" id="btn-export-data">📤 Export</button>
+          <button class="btn btn--secondary" id="btn-import-data">📥 Restore</button>
+        </div>
         <input type="file" id="import-file-input" accept=".json" style="display:none" />
         <hr class="settings-divider" />
         <button class="btn btn--danger btn--full" id="btn-reset-data">🗑 Reset All Data</button>
