@@ -678,6 +678,41 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 .settings-divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
 
+/* ── Google Sheets guide (collapsible) ───────────────────── */
+.sheets-guide {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.sheets-guide__toggle {
+  display: block;
+  padding: 9px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  user-select: none;
+  background: var(--primary-light);
+}
+.sheets-guide__toggle::-webkit-details-marker { display: none; }
+.sheets-guide[open] .sheets-guide__toggle { border-bottom: 1px solid var(--border); }
+.sheets-guide__steps {
+  margin: 0;
+  padding: 12px 12px 12px 28px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  background: var(--surface);
+}
+.sheets-guide__steps li { margin-bottom: 4px; }
+.sheets-guide__steps code {
+  background: var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 0.75rem;
+}
+
 /* ── Toast ───────────────────────────────────────────────── */
 .toast {
   position: fixed;

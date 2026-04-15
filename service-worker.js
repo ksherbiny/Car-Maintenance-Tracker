@@ -1,4 +1,4 @@
-const CACHE_NAME = 'car-tracker-v10';
+const CACHE_NAME = 'car-tracker-v11';
 const SYNC_QUEUE_KEY = 'sheets-sync-queue';
 
 // Will be fully populated in Step 6 — listed here as skeleton
@@ -11,7 +11,6 @@ const STATIC_ASSETS = [
   '/Car-Maintenance-Tracker/js/data.js',
   '/Car-Maintenance-Tracker/js/charts.js',
   '/Car-Maintenance-Tracker/js/google-sheets.js',
-  '/Car-Maintenance-Tracker/js/seed-data.js',
   '/Car-Maintenance-Tracker/pages/home.html',
   '/Car-Maintenance-Tracker/pages/add.html',
   '/Car-Maintenance-Tracker/pages/history.html',

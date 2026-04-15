@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('settings-backdrop').addEventListener('click', closeSettings);
   document.getElementById('btn-connect-sheets').addEventListener('click', connectSheets);
   document.getElementById('btn-save-reminders').addEventListener('click', saveReminders);
+  document.getElementById('btn-export-data').addEventListener('click', exportData);
+  document.getElementById('btn-import-data').addEventListener('click', () => document.getElementById('import-file-input').click());
+  document.getElementById('import-file-input').addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
   document.getElementById('btn-reset-data').addEventListener('click', resetData);
 
   // Navigate to home
@@ -524,6 +527,53 @@ async function renderReminders(stats) {
         <span class="reminder-card__badge reminder-card__badge--${status}">${badge}</span>
       </div>`;
   }).join('');
+}
+
+async function exportData() {
+  const entries = await getAllEntries();
+  if (!entries.length) { showToast('⚠️ No data to export'); return; }
+  const json = JSON.stringify(entries, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'car-maintenance-backup-' + todayISO() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Backup exported');
+}
+
+async function importData(file) {
+  try {
+    const text     = await file.text();
+    const imported = JSON.parse(text);
+    if (!Array.isArray(imported) || !imported.length) throw new Error('Invalid format');
+
+    const merge = confirm(
+      `Found ${imported.length} records in this backup.\n\nOK = Merge with existing data\nCancel = Replace all data`
+    );
+
+    if (merge) {
+      const existing    = await getAllEntries();
+      const existingIds = new Set(existing.map(e => e.id));
+      let added = 0;
+      for (const entry of imported) {
+        if (!existingIds.has(entry.id)) { await addEntry(entry); added++; }
+      }
+      showToast(`✅ Merged — ${added} new record${added !== 1 ? 's' : ''} added`);
+    } else {
+      if (!confirm('This will overwrite all current data. Are you sure?')) return;
+      await localforage.setItem('car_entries', imported);
+      showToast(`✅ Restored — ${imported.length} records`);
+    }
+
+    _allEntries = await getAllEntries();
+    closeSettings();
+    if (_currentPage === 'home')    initHome();
+    if (_currentPage === 'history') renderHistory();
+  } catch {
+    showToast('⚠️ Invalid backup file');
+  }
 }
 
 async function resetData() {

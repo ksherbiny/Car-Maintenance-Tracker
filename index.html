@@ -82,10 +82,17 @@
         <label class="settings-label" for="input-script-url">Apps Script URL</label>
         <input class="settings-input" type="url" id="input-script-url" placeholder="https://script.google.com/macros/s/…/exec" />
         <button class="btn btn--primary btn--full" id="btn-connect-sheets">🔗 Connect Google Sheets</button>
-        <p class="settings-hint">
-          Paste the Web App URL from your Google Apps Script deployment.<br/>
-          See GOOGLE_SHEETS_SETUP.md for the 5-step setup guide.
-        </p>
+        <details class="sheets-guide">
+          <summary class="sheets-guide__toggle">📖 How to set up Google Sheets sync</summary>
+          <ol class="sheets-guide__steps">
+            <li>Go to <strong>sheets.google.com</strong> → create a new blank sheet, name it <em>Car Maintenance Data</em></li>
+            <li>Inside the sheet: <strong>Extensions → Apps Script</strong> → delete the default code</li>
+            <li>Copy the script from <code>apps-script.gs</code> in the project → paste it → Save</li>
+            <li>Click <strong>Deploy → New deployment</strong> → type: <em>Web app</em> → Execute as: <em>Me</em> → Access: <em>Anyone</em> → Deploy</li>
+            <li>Authorize access when prompted → copy the <strong>Web App URL</strong></li>
+            <li>Paste that URL in the field above → tap <strong>Connect Google Sheets</strong></li>
+          </ol>
+        </details>
         <hr class="settings-divider" />
         <p class="settings-section-title">Maintenance Reminders</p>
         <label class="settings-label" for="input-oil-interval">Oil Change Every (km)</label>
@@ -96,6 +103,11 @@
         <input class="settings-input" type="number" id="input-daily-km" placeholder="e.g. 50" min="0" />
         <button class="btn btn--primary btn--full" id="btn-save-reminders">💾 Save Reminders</button>
 
+        <hr class="settings-divider" />
+        <p class="settings-section-title">Data Backup</p>
+        <button class="btn btn--secondary btn--full" id="btn-export-data">📤 Export Backup (JSON)</button>
+        <button class="btn btn--secondary btn--full" id="btn-import-data">📥 Restore from Backup</button>
+        <input type="file" id="import-file-input" accept=".json" style="display:none" />
         <hr class="settings-divider" />
         <button class="btn btn--danger btn--full" id="btn-reset-data">🗑 Reset All Data</button>
       </div>
