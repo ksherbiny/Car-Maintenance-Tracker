@@ -454,7 +454,11 @@ function fmtEGP(n) {
 function fmtDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const day   = String(d.getDate()).padStart(2, '0');
+  const month = months[d.getMonth()];
+  const year  = d.getFullYear();
+  return day + '-' + month + '-' + year;
 }
 
 function todayISO() {
