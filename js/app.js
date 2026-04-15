@@ -11,7 +11,7 @@ import {
 } from './charts.js';
 
 import {
-  initGoogleAuth, requestAuth, isSignedIn, syncAll, appendRow, updateRow, deleteRow
+  setScriptUrl, isConnected, syncAll, appendRow, updateRow, deleteRow
 } from './google-sheets.js';
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -21,8 +21,7 @@ let _historySearch  = '';
 let _historyPage    = 0;
 const PAGE_SIZE     = 20;
 let _allEntries     = [];
-let _sheetsClientId = '';
-let _sheetsSheetId  = '';
+let _scriptUrl      = '';
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -30,8 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   _allEntries = await getAllEntries();
 
   // Load saved settings
-  _sheetsClientId = (await getSetting('clientId')) || '';
-  _sheetsSheetId  = (await getSetting('sheetId'))  || '';
+  _scriptUrl = (await getSetting('scriptUrl')) || '';
+  if (_scriptUrl) setScriptUrl(_scriptUrl);
 
   // Wire nav
   document.querySelectorAll('.nav-item').forEach(btn => {
@@ -52,8 +51,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const overlay = document.getElementById('loading-overlay');
   overlay.classList.add('hidden');
 
-  // Attempt background sync if credentials exist
-  if (_sheetsClientId && _sheetsSheetId) {
+  // Attempt background sync if script URL is saved
+  if (_scriptUrl) {
     syncInBackground();
   }
 
@@ -191,17 +190,11 @@ function initAdd(editEntry = null) {
     if (id) {
       await updateEntry(entry);
       showToast('✅ Entry updated');
-      if (isSignedIn() && _sheetsSheetId) {
-        const all = await getAllEntries();
-        const idx = all.findIndex(e => e.id === id);
-        if (idx !== -1) updateRow(_sheetsSheetId, idx + 1, entry).catch(() => {});
-      }
+      if (isConnected()) updateRow(entry).catch(() => {});
     } else {
       await addEntry(entry);
       showToast('✅ Entry saved');
-      if (isSignedIn() && _sheetsSheetId) {
-        appendRow(_sheetsSheetId, entry).catch(() => {});
-      }
+      if (isConnected()) appendRow(entry).catch(() => {});
     }
 
     _allEntries = await getAllEntries();
@@ -317,11 +310,7 @@ function renderHistory() {
       if (!confirm('Delete this entry?')) return;
       const id = btn.closest('.entry-card').dataset.id;
       await deleteEntry(id);
-      if (isSignedIn() && _sheetsSheetId) {
-        const all  = await getAllEntries();
-        const idx  = all.findIndex(en => en.id === id);
-        if (idx !== -1) deleteRow(_sheetsSheetId, idx + 1).catch(() => {});
-      }
+      if (isConnected()) deleteRow(id).catch(() => {});
       _allEntries = await getAllEntries();
       showToast('🗑 Deleted');
       renderHistory();
@@ -397,8 +386,7 @@ async function initAnalysis() {
 function openSettings() {
   const modal = document.getElementById('settings-modal');
   modal.removeAttribute('hidden');
-  document.getElementById('input-client-id').value = _sheetsClientId;
-  document.getElementById('input-sheet-id').value  = _sheetsSheetId;
+  document.getElementById('input-script-url').value = _scriptUrl;
 }
 
 function closeSettings() {
@@ -406,23 +394,17 @@ function closeSettings() {
 }
 
 async function connectSheets() {
-  const clientId = document.getElementById('input-client-id').value.trim();
-  const sheetId  = document.getElementById('input-sheet-id').value.trim();
-  if (!clientId || !sheetId) { showToast('⚠️ Please enter both Client ID and Sheet ID'); return; }
-
-  try {
-    await initGoogleAuth(clientId);
-    await requestAuth();
-    _sheetsClientId = clientId;
-    _sheetsSheetId  = sheetId;
-    await setSetting('clientId', clientId);
-    await setSetting('sheetId', sheetId);
-    showToast('✅ Connected to Google Sheets');
-    closeSettings();
-    syncInBackground(true);
-  } catch (err) {
-    showToast('❌ Connection failed: ' + (err.message || err));
+  const url = document.getElementById('input-script-url').value.trim();
+  if (!url || !url.startsWith('https://script.google.com/')) {
+    showToast('⚠️ Please enter a valid Apps Script URL');
+    return;
   }
+  _scriptUrl = url;
+  setScriptUrl(url);
+  await setSetting('scriptUrl', url);
+  showToast('✅ Connected — syncing…');
+  closeSettings();
+  syncInBackground(true);
 }
 
 async function resetData() {
@@ -435,14 +417,9 @@ async function resetData() {
 
 // ── Sync ──────────────────────────────────────────────────────────────────────
 async function syncInBackground(showFeedback = false) {
-  if (!navigator.onLine || !_sheetsClientId || !_sheetsSheetId) return;
+  if (!navigator.onLine || !_scriptUrl) return;
   try {
-    if (!isSignedIn()) {
-      await initGoogleAuth(_sheetsClientId);
-      await requestAuth();
-    }
-    const merged = await syncAll(_sheetsSheetId, _allEntries);
-    // Persist merged result
+    const merged = await syncAll(_allEntries);
     await localforage.setItem('car_entries', merged);
     _allEntries = await getAllEntries();
     updateSyncBadge(true);

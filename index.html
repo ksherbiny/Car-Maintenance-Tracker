@@ -79,14 +79,12 @@
       </div>
       <div class="modal__body">
         <p class="settings-section-title">Google Sheets Sync</p>
-        <label class="settings-label" for="input-client-id">Client ID</label>
-        <input class="settings-input" type="text" id="input-client-id" placeholder="xxxx.apps.googleusercontent.com" />
-        <label class="settings-label" for="input-sheet-id">Sheet ID</label>
-        <input class="settings-input" type="text" id="input-sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+        <label class="settings-label" for="input-script-url">Apps Script URL</label>
+        <input class="settings-input" type="url" id="input-script-url" placeholder="https://script.google.com/macros/s/…/exec" />
         <button class="btn btn--primary btn--full" id="btn-connect-sheets">🔗 Connect Google Sheets</button>
         <p class="settings-hint">
-          Requires: Google Cloud Project → Sheets API → OAuth 2.0 Client ID.<br/>
-          Add your GitHub Pages URL as an Authorized redirect URI.
+          Paste the Web App URL from your Google Apps Script deployment.<br/>
+          See GOOGLE_SHEETS_SETUP.md for the 5-step setup guide.
         </p>
         <hr class="settings-divider" />
         <button class="btn btn--danger btn--full" id="btn-reset-data">🗑 Reset All Data</button>
