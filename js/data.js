@@ -1,5 +1,4 @@
 // js/data.js — IndexedDB layer via localForage
-import SEED_DATA from './seed-data.js';
 
 const STORE_KEY = 'car_entries';
 const META_KEY  = 'car_meta';
@@ -8,11 +7,6 @@ const META_KEY  = 'car_meta';
 
 export async function initDB() {
   localforage.config({ name: 'CarTracker', storeName: 'entries' });
-  const seeded = await localforage.getItem('__seeded__');
-  if (!seeded) {
-    await localforage.setItem(STORE_KEY, SEED_DATA);
-    await localforage.setItem('__seeded__', true);
-  }
 }
 
 // ── CRUD ────────────────────────────────────────────────────────────────────
