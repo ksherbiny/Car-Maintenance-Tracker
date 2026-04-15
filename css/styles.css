@@ -46,6 +46,20 @@ input, textarea, select { font-family: inherit; }
 img { max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 
+/* ── Home banner ─────────────────────────────────────────── */
+.home-banner {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: var(--card-shadow);
+}
+.home-banner__img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* ── Loading overlay ─────────────────────────────────────── */
 .loading-overlay {
   position: fixed; inset: 0; z-index: 9999;
