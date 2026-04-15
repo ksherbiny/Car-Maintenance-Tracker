@@ -56,7 +56,10 @@ export async function syncAll(localData) {
   const sheetById = Object.fromEntries(sheetData.map(e => [e.id, e]));
   const localById = Object.fromEntries(localData.map(e => [e.id, e]));
 
-  const toAppend = localData.filter(e => !sheetById[e.id]);
+  // Sort oldest → newest so the sheet rows are in chronological order
+  const toAppend = localData
+    .filter(e => !sheetById[e.id])
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   // Send all missing entries in a single batch request
   if (toAppend.length > 0) {
