@@ -22,26 +22,31 @@ Inside your new sheet:
 3. **Select all** (Ctrl+A) and **delete** it
 4. Paste the entire script below:
 
-```javascript
-const SHEET_NAME = 'Sheet1';
-const HEADERS = ['id','date','item','price','km','category','comment','source'];
+```
+var SHEET_NAME = 'Sheet1';
+var HEADERS = ['id','date','item','price','km','category','comment','source'];
 
 function doGet() {
   try {
-    const sheet = getSheet();
+    var sheet = getSheet();
     ensureHeader(sheet);
-    const rows = sheet.getDataRange().getValues().slice(1)
-      .map(r => ({
-        id:       String(r[0]),
-        date:     String(r[1]),
-        item:     String(r[2]),
-        price:    Number(r[3]),
-        km:       Number(r[4]),
-        category: String(r[5]),
-        comment:  String(r[6] || ''),
-        source:   String(r[7] || 'sheets')
-      }))
-      .filter(r => r.id);
+    var values = sheet.getDataRange().getValues();
+    var rows = [];
+    for (var i = 1; i < values.length; i++) {
+      var r = values[i];
+      if (r[0]) {
+        rows.push({
+          id: String(r[0]),
+          date: String(r[1]),
+          item: String(r[2]),
+          price: Number(r[3]),
+          km: Number(r[4]),
+          category: String(r[5]),
+          comment: String(r[6] || ''),
+          source: String(r[7] || 'sheets')
+        });
+      }
+    }
     return response({ ok: true, data: rows });
   } catch(err) {
     return response({ ok: false, error: err.message });
@@ -50,18 +55,17 @@ function doGet() {
 
 function doPost(e) {
   try {
-    const body   = JSON.parse(e.postData.contents);
-    const sheet  = getSheet();
+    var body = JSON.parse(e.postData.contents);
+    var sheet = getSheet();
     ensureHeader(sheet);
-    const action = body.action;
 
-    if (action === 'append') {
+    if (body.action === 'append') {
       sheet.appendRow(toRow(body.entry));
 
-    } else if (action === 'update') {
-      const data = sheet.getDataRange().getValues();
-      let found  = false;
-      for (let i = 1; i < data.length; i++) {
+    } else if (body.action === 'update') {
+      var data = sheet.getDataRange().getValues();
+      var found = false;
+      for (var i = 1; i < data.length; i++) {
         if (String(data[i][0]) === String(body.entry.id)) {
           sheet.getRange(i+1, 1, 1, 8).setValues([toRow(body.entry)]);
           found = true;
@@ -70,9 +74,9 @@ function doPost(e) {
       }
       if (!found) sheet.appendRow(toRow(body.entry));
 
-    } else if (action === 'delete') {
-      const data = sheet.getDataRange().getValues();
-      for (let i = 1; i < data.length; i++) {
+    } else if (body.action === 'delete') {
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
         if (String(data[i][0]) === String(body.id)) {
           sheet.deleteRow(i + 1);
           break;
@@ -86,31 +90,24 @@ function doPost(e) {
   }
 }
 
-// ── Helpers ──────────────────────────────────────────────────
 function getSheet() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME)
       || SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
 }
 
 function ensureHeader(sheet) {
-  const first = sheet.getRange(1, 1, 1, 8).getValues()[0];
+  var first = sheet.getRange(1, 1, 1, 8).getValues()[0];
   if (first[0] !== 'id') {
     sheet.getRange(1, 1, 1, 8).setValues([HEADERS]);
   }
 }
 
 function toRow(e) {
-  return [
-    e.id, e.date, e.item,
-    e.price || 0, e.km || 0,
-    e.category, e.comment || '', e.source || 'manual'
-  ];
+  return [e.id, e.date, e.item, e.price || 0, e.km || 0, e.category, e.comment || '', e.source || 'manual'];
 }
 
 function response(data) {
-  return ContentService
-    .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
 ```
 
@@ -186,6 +183,7 @@ create a new version of the same deployment.
 
 | Problem | Fix |
 |---------|-----|
+| SyntaxError on line 1 | You accidentally copied the ` ``` ` fence from the markdown — delete everything in the editor and paste only the code between the fences |
 | Badge stays Offline | Check internet connection |
 | Badge shows Synced but sheet is empty | Wait 10 seconds and pull-to-refresh; first sync uploads all 123 records which takes a moment |
 | "Apps Script URL" validation error | Make sure the URL starts with `https://script.google.com/macros/s/` |
