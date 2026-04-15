@@ -1,40 +1,46 @@
 <div class="page page--home" id="page-home">
 
+  <!-- App title -->
+  <div class="home-title-wrap">
+    <h1 class="home-title">🚗 Car Maintenance Tracker</h1>
+    <p class="home-subtitle">Your complete service history</p>
+  </div>
+
   <!-- Hero banner -->
   <div class="home-banner">
     <img src="icons/Car Mnt.png" alt="Car Maintenance Tracker" class="home-banner__img" />
   </div>
 
   <!-- Sync status -->
-  <div class="section-header mb-8">
+  <div class="home-sync-row mb-8">
     <span class="sync-badge sync-badge--offline" id="sync-badge">⬤ Offline</span>
   </div>
 
-  <!-- Summary cards -->
-  <div class="stat-card stat-card--full card mb-12" id="stat-total">
+  <!-- Total spent — full-width hero card -->
+  <div class="stat-card stat-card--full stat-card--hero mb-12" id="stat-total">
     <div class="stat-card__icon">💰</div>
     <div class="stat-card__label">Total Spent (All Time)</div>
     <div class="stat-card__value" id="val-total">Loading…</div>
   </div>
 
   <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card stat-card--center">
       <div class="stat-card__icon">📅</div>
       <div class="stat-card__label">This Year</div>
       <div class="stat-card__value" id="val-year">—</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card stat-card--center">
       <div class="stat-card__icon">🗓</div>
       <div class="stat-card__label">This Month</div>
       <div class="stat-card__value" id="val-month">—</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card stat-card--center">
       <div class="stat-card__icon">🛢</div>
       <div class="stat-card__label">Last Oil Change</div>
       <div class="stat-card__value" id="val-oil">—</div>
       <div class="stat-card__sub" id="val-oil-km"></div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card stat-card--center">
       <div class="stat-card__icon">🚗</div>
       <div class="stat-card__label">Odometer</div>
       <div class="stat-card__value" id="val-km">—</div>
