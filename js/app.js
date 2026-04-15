@@ -207,14 +207,16 @@ function initAdd(editEntry = null) {
 
 // ── HISTORY ───────────────────────────────────────────────────────────────────
 async function initHistory() {
+  _historyFilter = 'All';
+  _historySearch = '';
+  _historyPage   = 0;
   buildFilterChips();
   renderHistory();
 
-  document.getElementById('history-search')?.addEventListener('input', e => {
-    _historySearch = e.target.value.toLowerCase();
-    _historyPage   = 0;
-    renderHistory();
-  });
+  const searchEl = document.getElementById('history-search');
+  const onSearch = e => { _historySearch = e.target.value.toLowerCase(); _historyPage = 0; renderHistory(); };
+  searchEl?.addEventListener('input',  onSearch);
+  searchEl?.addEventListener('search', onSearch);  // fires when native ✕ is tapped on mobile
 
   // Pull-to-refresh
   let touchStartY = 0;
@@ -497,7 +499,7 @@ async function renderReminders(stats) {
       const nextKm   = lastKm + tireInterval;
       const kmLeft   = nextKm - currentKm;
       const daysLeft = Math.round(kmLeft / dailyKm);
-      alerts.push({ icon: '🔧', type: 'tire', label: 'Tire Change', kmLeft, daysLeft });
+      alerts.push({ icon: '☸', type: 'tire', label: 'Tire Change', kmLeft, daysLeft });
     }
   }
 
@@ -514,7 +516,7 @@ async function renderReminders(stats) {
     const badge   = status === 'danger' ? '⚠️ Overdue' : status === 'warning' ? '⏰ Soon' : '✅ OK';
     return `
       <div class="reminder-card reminder-card--${status}">
-        <span class="reminder-card__icon reminder-card__icon--${a.type}">${a.icon}</span>
+        <span class="reminder-card__icon">${a.icon}</span>
         <div class="reminder-card__info">
           <div class="reminder-card__label">${a.label}</div>
           <div class="reminder-card__detail">${kmText} · ${dayText}</div>
@@ -603,7 +605,7 @@ function setText(id, val) {
 
 const CAT_ICONS = {
   'Oil Change':     '🛢',
-  'Tires':          '🛞',
+  'Tires':          '☸',
   'Engine':         '⚙️',
   'Suspension':     '🔧',
   'AC':             '❄️',

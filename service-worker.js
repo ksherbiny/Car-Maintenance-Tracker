@@ -1,4 +1,4 @@
-const CACHE_NAME = 'car-tracker-v5';
+const CACHE_NAME = 'car-tracker-v9';
 const SYNC_QUEUE_KEY = 'sheets-sync-queue';
 
 // Will be fully populated in Step 6 — listed here as skeleton
