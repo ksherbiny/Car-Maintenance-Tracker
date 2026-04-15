@@ -499,7 +499,7 @@ async function renderReminders(stats) {
       const nextKm   = lastKm + tireInterval;
       const kmLeft   = nextKm - currentKm;
       const daysLeft = Math.round(kmLeft / dailyKm);
-      alerts.push({ icon: '☸', type: 'tire', label: 'Tire Change', kmLeft, daysLeft });
+      alerts.push({ icon: '🛞', type: 'tire', label: 'Tire Change', kmLeft, daysLeft });
     }
   }
 
@@ -605,7 +605,7 @@ function setText(id, val) {
 
 const CAT_ICONS = {
   'Oil Change':     '🛢',
-  'Tires':          '☸',
+  'Tires':          '🛞',
   'Engine':         '⚙️',
   'Suspension':     '🔧',
   'AC':             '❄️',
