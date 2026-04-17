@@ -50,20 +50,20 @@ export async function getStats() {
   const thisMonth = now.getMonth();
 
   let totalAll = 0, totalYear = 0, totalMonth = 0;
-  let lastOil = null, maxKm = 0;
+  let lastOil = null, maxKm = 0, maxKmDate = null;
 
   for (const e of entries) {
     const d = new Date(e.date);
     totalAll += e.price;
     if (d.getFullYear() === thisYear) totalYear += e.price;
     if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) totalMonth += e.price;
-    if (e.km > maxKm) maxKm = e.km;
+    if (e.km > maxKm) { maxKm = e.km; maxKmDate = e.date; }
     if (e.category === 'Oil Change') {
       if (!lastOil || new Date(e.date) > new Date(lastOil.date)) lastOil = e;
     }
   }
 
-  return { totalAll, totalYear, totalMonth, lastOil, currentKm: maxKm };
+  return { totalAll, totalYear, totalMonth, lastOil, currentKm: maxKm, lastKmDate: maxKmDate };
 }
 
 export async function getYearlyTotals() {

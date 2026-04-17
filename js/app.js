@@ -462,6 +462,7 @@ async function updateReminderState() {
   await setSetting('reminderState', {
     oilInterval, tireInterval, dailyKm,
     currentKm:  stats.currentKm * 1000,
+    lastKmDate: stats.lastKmDate || null,
     lastOilKm:  stats.lastOil  ? stats.lastOil.km  * 1000 : 0,
     lastTireKm: lastTire       ? lastTire.km        * 1000 : 0
   });
@@ -480,7 +481,11 @@ async function renderReminders(stats) {
     return;
   }
 
-  const currentKm = stats.currentKm * 1000;
+  // Project km forward using dailyKm so the countdown ticks down each day automatically
+  const daysSinceLog = stats.lastKmDate
+    ? Math.floor((Date.now() - new Date(stats.lastKmDate).getTime()) / 86400000)
+    : 0;
+  const currentKm = stats.currentKm * 1000 + daysSinceLog * dailyKm;
   const alerts = [];
 
   // Oil change reminder

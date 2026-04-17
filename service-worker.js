@@ -73,10 +73,15 @@ async function checkMaintenanceAndNotify() {
     var rs = meta.reminderState;
     if (!rs.dailyKm) return;
 
+    var daysSinceLog = rs.lastKmDate
+      ? Math.floor((Date.now() - new Date(rs.lastKmDate).getTime()) / 86400000)
+      : 0;
+    var estimatedKm = rs.currentKm + daysSinceLog * rs.dailyKm;
+
     var toNotify = [];
 
     if (rs.oilInterval && rs.lastOilKm) {
-      var oilLeft = (rs.lastOilKm + rs.oilInterval) - rs.currentKm;
+      var oilLeft = (rs.lastOilKm + rs.oilInterval) - estimatedKm;
       var oilDays = Math.round(oilLeft / rs.dailyKm);
       if (oilDays <= 14) {
         toNotify.push({
@@ -90,7 +95,7 @@ async function checkMaintenanceAndNotify() {
     }
 
     if (rs.tireInterval && rs.lastTireKm) {
-      var tireLeft = (rs.lastTireKm + rs.tireInterval) - rs.currentKm;
+      var tireLeft = (rs.lastTireKm + rs.tireInterval) - estimatedKm;
       var tireDays = Math.round(tireLeft / rs.dailyKm);
       if (tireDays <= 14) {
         toNotify.push({
