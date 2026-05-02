@@ -41,6 +41,34 @@ export async function readSheet() {
   return json.data.map(e => ({ ...e, date: normalizeDate(e.date) }));
 }
 
+// ── Sent-queue helpers ────────────────────────────────────────────────────────
+// Tracks IDs we've already POSTed so syncAll() doesn't re-send them before
+// Apps Script has had time to process the write (fire-and-forget latency).
+const SENT_QUEUE_KEY = 'sheets_sent_queue';
+const SENT_QUEUE_TTL = 10 * 60 * 1000; // 10 min — retry if still not in sheet
+
+function getSentQueue() {
+  try { return JSON.parse(localStorage.getItem(SENT_QUEUE_KEY) || '{}'); } catch { return {}; }
+}
+function setSentQueue(q) {
+  try { localStorage.setItem(SENT_QUEUE_KEY, JSON.stringify(q)); } catch {}
+}
+function markSent(ids) {
+  const q = getSentQueue();
+  const now = Date.now();
+  for (const id of ids) q[id] = now;
+  setSentQueue(q);
+}
+function pruneSentQueue(sheetById) {
+  const q = getSentQueue();
+  const now = Date.now();
+  for (const id of Object.keys(q)) {
+    if (sheetById[id] || (now - q[id]) > SENT_QUEUE_TTL) delete q[id];
+  }
+  setSentQueue(q);
+  return q;
+}
+
 // ── Write (fire-and-forget, no-cors) ─────────────────────────────────────────
 // Apps Script POST works with text/plain + no-cors — response is opaque but
 // the request is received and processed by the script.
@@ -54,6 +82,7 @@ function scriptPost(body) {
 }
 
 export function appendRow(entry) {
+  markSent([entry.id]);
   return scriptPost({ action: 'append', entry });
 }
 
@@ -76,13 +105,19 @@ export async function syncAll(localData) {
   const sheetById = Object.fromEntries(sheetData.map(e => [e.id, e]));
   const localById = Object.fromEntries(localData.map(e => [e.id, e]));
 
+  // Remove confirmed/expired entries from the sent queue
+  const sentQueue = pruneSentQueue(sheetById);
+
   // Sort oldest → newest so the sheet rows are in chronological order
+  // Skip entries already in the sent queue — they were sent recently and the
+  // Apps Script write may not have appeared in the GET response yet.
   const toAppend = localData
-    .filter(e => !sheetById[e.id])
+    .filter(e => !sheetById[e.id] && !sentQueue[e.id])
     .sort((a, b) => a.date.localeCompare(b.date));
 
   // Send all missing entries in a single batch request
   if (toAppend.length > 0) {
+    markSent(toAppend.map(e => e.id));
     scriptPost({ action: 'batchAppend', entries: toAppend });
   }
 
