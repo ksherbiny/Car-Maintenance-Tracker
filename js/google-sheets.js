@@ -94,34 +94,60 @@ export function deleteRow(id) {
   return scriptPost({ action: 'delete', id });
 }
 
+// ── Confirmed-IDs helpers ─────────────────────────────────────────────────────
+// Tracks IDs we've ever seen in the sheet. Used to distinguish:
+//   "new local entry that needs uploading" vs "was in sheet, now deleted from sheet".
+const CONFIRMED_KEY = 'sheets_confirmed_ids';
+
+function getConfirmedIds() {
+  try { return new Set(JSON.parse(localStorage.getItem(CONFIRMED_KEY) || '[]')); } catch { return new Set(); }
+}
+function saveConfirmedIds(set) {
+  try { localStorage.setItem(CONFIRMED_KEY, JSON.stringify([...set])); } catch {}
+}
+
 // ── Sync ─────────────────────────────────────────────────────────────────────
-// 1. Pull sheet data via GET
-// 2. Compute which local entries are missing from the sheet
-// 3. Send ALL missing entries in ONE batch POST (avoids rate-limiting)
-// 4. Return merged list (local wins on conflict)
+// 1. Pull sheet data via GET, deduplicate by ID
+// 2. Update confirmed-IDs set (IDs we've seen in the sheet)
+// 3. Send local entries that are genuinely new (never been in sheet)
+// 4. Return merged list: sheet entries (local wins on conflict) + new local
+//    — entries confirmed before but now gone from sheet are treated as deleted
 export async function syncAll(localData) {
-  const sheetData = await readSheet();
+  const rawSheet = await readSheet();
+
+  // Deduplicate sheet rows by ID — keeps first occurrence, drops duplicates
+  const seen = new Set();
+  const sheetData = rawSheet.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
 
   const sheetById = Object.fromEntries(sheetData.map(e => [e.id, e]));
   const localById = Object.fromEntries(localData.map(e => [e.id, e]));
 
+  // Update the set of IDs confirmed to have been in the sheet
+  const confirmedIds = getConfirmedIds();
+  for (const e of sheetData) confirmedIds.add(e.id);
+  saveConfirmedIds(confirmedIds);
+
   // Remove confirmed/expired entries from the sent queue
   const sentQueue = pruneSentQueue(sheetById);
 
-  // Sort oldest → newest so the sheet rows are in chronological order
-  // Skip entries already in the sent queue — they were sent recently and the
-  // Apps Script write may not have appeared in the GET response yet.
+  // Only upload entries that:
+  //   - are not already in the sheet
+  //   - are not recently sent (still in-flight)
+  //   - have NEVER been confirmed in the sheet (otherwise they were deleted there on purpose)
   const toAppend = localData
-    .filter(e => !sheetById[e.id] && !sentQueue[e.id])
+    .filter(e => !sheetById[e.id] && !sentQueue[e.id] && !confirmedIds.has(e.id))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  // Send all missing entries in a single batch request
   if (toAppend.length > 0) {
     markSent(toAppend.map(e => e.id));
     scriptPost({ action: 'batchAppend', entries: toAppend });
   }
 
-  // Merge: local wins on conflicts; sheet-only entries are pulled in
+  // Final merged list: deduplicated sheet (local version wins) + new local entries
   const merged = [
     ...sheetData.map(s => localById[s.id] || s),
     ...toAppend
