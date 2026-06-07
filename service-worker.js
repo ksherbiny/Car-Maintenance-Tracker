@@ -1,4 +1,4 @@
-const CACHE_NAME = 'car-tracker-v1.02';
+const CACHE_NAME = 'car-tracker-v1.03';
 const SYNC_QUEUE_KEY = 'sheets-sync-queue';
 
 // Will be fully populated in Step 6 — listed here as skeleton
@@ -37,8 +37,13 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Don't intercept Google API calls — let them fail naturally when offline
-  if (event.request.url.includes('googleapis.com') || event.request.url.includes('apis.google.com')) {
+  // Don't intercept Google API / Apps Script calls — responses must always be fresh
+  if (
+    event.request.url.includes('googleapis.com') ||
+    event.request.url.includes('apis.google.com') ||
+    event.request.url.includes('script.google.com') ||
+    event.request.url.includes('script.googleusercontent.com')
+  ) {
     return;
   }
   event.respondWith(
